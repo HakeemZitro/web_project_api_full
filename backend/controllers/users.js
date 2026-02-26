@@ -9,7 +9,7 @@ const { NODE_ENV, JWT_SECRET } = process.env;
 module.exports.getUsers = (req, res) => {
   User.find({})
     .orFail(() => {
-      const error = new Error('No se encontraron usuarios');
+      const error = new Error("No se encontraron usuarios");
       error.statusCode = 404;
       throw error;
     })
@@ -25,7 +25,7 @@ module.exports.getUserById = (req, res) => {
   User.findById(id)
     .then(user => res.send({ data: user }))
     .catch(err => {
-      if (err.name === 'CastError') {
+      if (err.name === "CastError") {
         return res.status(404).send({ message: "Usuario no encontrado o ID inválido" });
       }
       res.status(err.statusCode || 500).send({ message: err.message || "Error interno del servidor"});
@@ -70,7 +70,7 @@ module.exports.updateUserInfo = (req, res) => {
         res.send({ data: updatedUser })
       })
     .catch(err => {
-      if (err.name === 'ValidationError') {
+      if (err.name === "ValidationError") {
         return res.status(400).send({ message: "Datos insuficientes o inválidos para actualizar un usuario" });
       }
       res.status(err.statusCode || 500).send({
@@ -92,7 +92,7 @@ module.exports.updateUserAvatar = (req, res) => {
         res.send({ data: updatedUser })
       })
     .catch(err => {
-      if (err.name === 'ValidationError') {
+      if (err.name === "ValidationError") {
         return res.status(400).send({ message: "Datos insuficientes o inválidos para actualizar el avatar" });
       }
       res.status(err.statusCode || 500).send({

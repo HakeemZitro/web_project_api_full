@@ -3,11 +3,12 @@ const mongoose = require("mongoose");
 const usersRouter = require("./routes/users.js");
 const cardsRouter = require("./routes/cards.js");
 const { login, createUser } = require("./controllers/users.js");
+const { auth } = require("./middlewares/auth.js");
 
 
 const { PORT = 3000 } = process.env;
 const app = express();
-mongoose.connect('mongodb://localhost:27017/aroundb');
+mongoose.connect("mongodb://localhost:27017/aroundb");
 
 
 app.use(express.urlencoded({ extended: true }));
@@ -19,10 +20,11 @@ app.use((req, res, next) => {
   next();
 });
 
-app.post('/signin', login);
-app.post('/signup', createUser);
-app.use("/", usersRouter);
-app.use("/", cardsRouter);
+app.post("/signin", login);
+app.post("/signup", createUser);
+
+app.use("/", auth, usersRouter);
+app.use("/", auth, cardsRouter);
 app.use((req, res, next) => {
   res.status(404).send({ message: "Recurso solicitado no encontrado" })
 });
