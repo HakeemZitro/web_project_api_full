@@ -8,14 +8,27 @@ const { NODE_ENV, JWT_SECRET } = process.env;
 // ----- Obtener todos los usuarios ----- //
 module.exports.getUsers = (req, res) => {
   User.find({})
+  .orFail(() => {
+    const error = new Error("No se encontraron usuarios");
+    error.statusCode = 404;
+    throw error;
+  })
+  .then((users) => res.send({ data: users }))
+  .catch((err) => res.status(err.statusCode).send({ message: err.message }));
+};
+
+
+// ----- Obtener informacion de usuario actual ----- //
+module.exports.getUserInfo = (req, res) => {
+  User.findById(req.user._id)
     .orFail(() => {
-      const error = new Error("No se encontraron usuarios");
-      error.statusCode = 404;
+      const error = new Error("Sin autorización, inicia sesión");
+      error.statusCode = 401;
       throw error;
     })
-    .then((users) => res.send({ data: users }))
-    .catch((err) => res.status(err.statusCode).send({ message: err.message }));
-};
+    .then(user => res.send({ data: user }))
+    .catch(err => res.status(err.statusCode).send({ message: err.message }));
+}
 
 
 // ----- Obtener un usuario por ID ----- //
