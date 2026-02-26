@@ -1,4 +1,5 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
+const validator = require("validator");
 
 const cardSchema = new mongoose.Schema({
   name: {
@@ -11,9 +12,7 @@ const cardSchema = new mongoose.Schema({
     type: String,
     required: true,
     validate: {
-      validator: function(v) {
-        return /^https?:\/\/(www\.)?[a-zA-Z0-9-]{1,256}\.[a-zA-Z0-9.]{1,8}\b([a-zA-Z0-9._~:/?%#\[\]@!$&'()*+,;=-]*)$/.test(v);
-      }
+      validator: (v) => validator.isURL(v)
     },
   },
   owner: {
@@ -32,4 +31,4 @@ const cardSchema = new mongoose.Schema({
   },
 });
 
-module.exports = mongoose.model('card', cardSchema);
+module.exports = mongoose.model("card", cardSchema);

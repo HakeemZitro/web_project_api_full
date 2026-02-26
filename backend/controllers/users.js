@@ -1,4 +1,8 @@
 const User = require("../models/user.js");
+const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
+require("dotenv").config();
+const { NODE_ENV, JWT_SECRET } = process.env;
 
 
 // ----- Obtener todos los usuarios ----- //
@@ -31,12 +35,27 @@ module.exports.getUserById = (req, res) => {
 
 // ----- Crear nuevo usuario ----- //
 module.exports.createUser = (req, res) => {
-  const { name, about, avatar } = req.body;
+  const { email, password } = req.body;
 
-  User.create({ name, about, avatar })
-    .then(newUser => res.send({ data: newUser }))
-    .catch(err => res.status(400).send({ message: "Datos insuficientes o inválidos para crear un usuario" }));
+  bcrypt.hash(password, 10)
+  .then ((hash) => User.create({ email, password: hash }))
+  .then(newUser => res.send({ data: newUser }))
+  .catch(err => res.status(400).send({ message: "Datos insuficientes o inválidos para crear un usuario" }));
 };
+
+
+// ----- Inicio de Sesion ----- //
+module.exports.login = (req, res) => {
+  const { email, password } = req.body;
+
+  User.findUserByCredentials(email, password)
+    .then((user) => {
+      res.send({ token: jwt.sign({ _id: user._id }, NODE_ENV === "production" ? JWT_SECRET : "dev-secret", { expiresIn: "7d" }) });
+    })
+    .catch((err) => {
+      res.status(401).send({ message: err.message });
+    });
+}
 
 
 // ----- Actualizar información de usuario ----- //
