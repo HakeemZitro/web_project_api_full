@@ -23,7 +23,7 @@ module.exports.getUserInfo = (req, res) => {
   User.findById(req.user._id)
     .orFail(() => {
       const error = new Error("Sin autorización, inicia sesión");
-      error.statusCode = 401;
+      error.statusCode = 403;
       throw error;
     })
     .then(user => res.send({ data: user }))
