@@ -26,6 +26,7 @@ charset = utf-8
 # Valores posibles: true, false
 trim_trailing_whitespace = true
 
+# Desactivar para Markdown porque los espacios en blanco al final son importantes
 [*.md]
 trim_trailing_whitespace = false
 
