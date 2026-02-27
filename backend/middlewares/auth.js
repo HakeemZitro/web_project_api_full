@@ -2,12 +2,17 @@ const jwt = require("jsonwebtoken");
 require("dotenv").config();
 const { NODE_ENV, JWT_SECRET } = process.env;
 
+const UnauthorizedError = require("../errors/unauthorized-err.js");
+const ForbiddenError = require("../errors/forbidden-err.js");
 
+
+// ----- Confirma autorizacion mediante token ----- //
 module.exports.auth = (req, res, next) => {
   const { authorization } = req.headers;
 
-  if (!authorization || !authorization.startsWith("Bearer ")) {
-    return res.status(403).send({ message: "Sin autorización, inicia sesión" });
+  if (!authorization) {
+    const err = new ForbiddenError("Sin autorización, inicia sesión");
+    next(err);
   }
 
   const token = authorization.replace("Bearer ", "");
@@ -19,7 +24,8 @@ module.exports.auth = (req, res, next) => {
     req.user = payload;
     next();
   }
-  catch (err) {
-    return res.status(401).send({ message: "Token inválido" });
+  catch (e) {
+    const err = new UnauthorizedError("Token inválido");
+    next(err);
   }
 };

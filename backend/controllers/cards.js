@@ -1,65 +1,70 @@
 const Card = require("../models/card.js");
 
+const BadRequestError = require("../errors/bad-request-err.js");
+const ForbiddenError = require("../errors/forbidden-err.js");
+const NotFoundError = require("../errors/not-found-err.js");
+
 
 // ----- Obtener todos las tarjetas ----- //
-module.exports.getCards = (req, res) => {
+module.exports.getCards = (req, res, next) => {
   Card.find({})
-  .orFail(() => {
-    const error = new Error("No se encontraron tarjetas");
-    error.statusCode = 404;
-    throw error;
-  })
-  .populate([ "owner", "likes" ])
-  .then(cards => res.send(cards))
-  .catch(err => res.status(err.statusCode).send({ message: err.message }));
+    .orFail(() => { throw new NotFoundError("No se encontraron tarjetas") })
+    .populate([ "owner", "likes" ])
+    .then(cards => res.send(cards))
+    .catch(next);
 };
 
 
 // ----- Crear nueva tarjeta ----- //
-module.exports.createCard = (req, res) => {
+module.exports.createCard = (req, res, next) => {
   const { name, link } = req.body;
 
   Card.create({ name, link, owner: req.user._id })
-  .then(card => res.send(card))
-  .catch(err => res.status(400).send({ message: "Datos insuficientes o inválidos para crear una tarjeta" }));
+    .then(card => res.send(card))
+    .catch(() => {
+      const err = new BadRequestError("Datos insuficientes o inválidos para crear una tarjeta");
+      next(err);
+    });
 };
 
 
 // ----- Eliminar tarjeta por ID ----- //
-module.exports.deleteCard = (req, res) => {
+module.exports.deleteCard = (req, res, next) => {
   const { cardId } = req.params;
 
   Card.findById(cardId)
-    .orFail(() => {
-      const error = new Error("La tarjeta que intentas eliminar no existe");
-      error.statusCode = 404;
-      throw error;
-    })
+    .orFail(() => { throw new NotFoundError("La tarjeta que intentas eliminar no existe") })
     .then(card => {
       if (card.owner.toString() !== req.user._id) {
-        return res.status(403).send({ message: "No tienes permiso para eliminar esta tarjeta" });
+        throw new ForbiddenError("No tienes permiso para eliminar esta tarjeta")
       }
       return card.deleteOne().then(() => res.send(card));
     })
-    .catch(err => res.status(err.statusCode || 500).send({ message: err.message || "Error interno del servidor" }));
+    .catch(next);
 };
 
 
 // ----- Dar like a una tarjeta ----- //
-module.exports.likeCard = (req, res) => {
+module.exports.likeCard = (req, res, next) => {
   const { cardId } = req.params;
 
   Card.findByIdAndUpdate(cardId, { $addToSet: { likes: req.user._id } }, { new: true })
     .then(card => res.send(card))
-    .catch(err => res.status(404).send({ message: "La tarjeta a la que intentas dar like no existe" }));
+    .catch(() => {
+      const err = new NotFoundError("La tarjeta a la que intentas dar like no existe");
+      next(err);
+    });
 }
 
 
 // ----- Quitar like a una tarjeta ----- //
-module.exports.dislikeCard = (req, res) => {
+module.exports.dislikeCard = (req, res, next) => {
   const { cardId } = req.params;
 
   Card.findByIdAndUpdate(cardId, { $pull: { likes: req.user._id } }, { new: true })
     .then(card => res.send(card))
-    .catch(err => res.status(404).send({ message: "La tarjeta a la que intentas quitar el like no existe" }));
+    .catch(() => {
+      const err = new NotFoundError("La tarjeta a la que intentas quitar el like no existe");
+      next(err);
+    });
 };

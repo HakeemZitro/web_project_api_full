@@ -4,9 +4,10 @@ const usersRouter = require("./routes/users.js");
 const cardsRouter = require("./routes/cards.js");
 const { login, createUser } = require("./controllers/users.js");
 const { auth } = require("./middlewares/auth.js");
+require("dotenv").config();
+const { NODE_ENV, PORT } = process.env;
 
 
-const { PORT = 3000 } = process.env;
 const app = express();
 mongoose.connect("mongodb://localhost:27017/aroundb");
 
@@ -24,14 +25,10 @@ app.use((req, res, next) => {
   res.status(404).send({ message: "Recurso solicitado no encontrado" })
 });
 app.use((err, req, res, next) => {
-  if(err.name === "SyntaxError") {
-    return res.status(400).send({ message: "Solicitud inválida, revisa la sintaxis de tu solicitud" });
-  } else {
-    res.status(500).send({ message: "Error interno del servidor" });
-  }
+  const { statusCode = 500, message } = err;
+
+  res.status(statusCode).send({ message: statusCode === 500 ? 'Se ha producido un error en el servidor' : message });
 });
 
 
-app.listen(PORT, () => {
-  console.log(`Aplicacion escuchando el puerto ${PORT}`);
-});
+app.listen(NODE_ENV === "production" ? PORT : 3000);
