@@ -14,20 +14,24 @@ const userSchema = new mongoose.Schema({
   password: {
     type: String,
     required: true,
-    minlength: 8,
+    minLength: 6,
+    select: false,
   },
   name: {
-    type: { type: String, default: "Jacques Cousteau" },
-    minlength: 2,
-    maxlength: 30,
+    type: String,
+    default: "Jacques Cousteau",
+    minLength: 2,
+    maxLength: 40,
   },
   about: {
-    type: { type: String, default: "Explorador" },
-    minlength: 2,
-    maxlength: 30,
+    type: String,
+    default: "Explorador",
+    minLength: 2,
+    maxLength: 200,
   },
   avatar: {
-    type: { type: String, default: "https://practicum-content.s3.us-west-1.amazonaws.com/resources/moved_avatar_1604080799.jpg"},
+    type: String,
+    default: "https://practicum-content.s3.us-west-1.amazonaws.com/resources/moved_avatar_1604080799.jpg",
     validate: {
       validator: (v) => validator.isURL(v)
     },
@@ -35,7 +39,7 @@ const userSchema = new mongoose.Schema({
 });
 
 userSchema.statics.findUserByCredentials = function(email, password) {
-  return this.findOne({ email })
+  return this.findOne({ email }).select("+password")
     .then((user) => {
       if(!user) {
         return Promise.reject(new Error("Email o contraseña incorrecto"));
