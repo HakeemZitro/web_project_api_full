@@ -43,15 +43,15 @@ module.exports.getUserById = (req, res, next) => {
 module.exports.createUser = (req, res, next) => {
   const { email, password } = req.body;
 
-  bcrypt.hash(password, NODE_ENV === "production" ? BCRYPT_ROUNDS : 10)
+  bcrypt.hash(password, NODE_ENV === "production" ? Number(BCRYPT_ROUNDS) : 10)
     .then((hash) => User.create({ email, password: hash }))
     .then((newUser) => res.status(201).send({ _id: newUser._id, email: newUser.email }))
     .catch((err) => {
       if (err.code === 11000) {
-        next(new ConflictError("El email que intentas usar ya está registrado"));
+        return next(new ConflictError("El email que intentas usar ya está registrado"));
       }
       if (err.name === "ValidationError") {
-        next(new BadRequestError("Datos insuficientes y/o inválidos para crear un usuario"));
+        return next(new BadRequestError("Datos insuficientes y/o inválidos para crear un usuario"));
       }
       next(err);
     });
@@ -82,7 +82,7 @@ module.exports.updateUserInfo = (req, res, next) => {
       })
     .catch(err => {
       if (err.name === "ValidationError") {
-        next(new BadRequestError("Datos insuficientes o inválidos para actualizar un usuario"));
+        return next(new BadRequestError("Datos insuficientes o inválidos para actualizar un usuario"));
       }
       next(err);
     });
@@ -99,7 +99,7 @@ module.exports.updateUserAvatar = (req, res, next) => {
       })
     .catch(err => {
       if (err.name === "ValidationError") {
-        next(new BadRequestError("Datos insuficientes o inválidos para actualizar el avatar"));
+        return next(new BadRequestError("Datos insuficientes o inválidos para actualizar el avatar"));
       }
       next(err);
     });

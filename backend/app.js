@@ -8,7 +8,7 @@ const { celebrate, Joi, errors } = require("celebrate");
 const NotFoundError = require("./errors/not-found-err.js");
 const { requestLogger, errorLogger } = require('./middlewares/logger');
 require("dotenv").config();
-const { PORT } = process.env;
+const { NODE_ENV, PORT } = process.env;
 
 const cors = require("cors");
 const allowedOrigins = ["https://around.hzitro.dev", "https://www.around.hzitro.dev", "https://api.around.hzitro.dev", "http://localhost:3210"];
@@ -31,9 +31,7 @@ var corsOptions = {
 const app = express();
 mongoose.connect("mongodb://localhost:27017/aroundb");
 
-app.use(cors({
-  origin: corsOptions,
-}));
+app.use(cors(corsOptions));
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
@@ -78,4 +76,4 @@ app.use((err, req, res, next) => {
 });
 
 
-app.listen(PORT);
+app.listen(NODE_ENV === "production" ? PORT : 3000);
