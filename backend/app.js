@@ -24,15 +24,18 @@ const allowedOrigins = FRONTEND_URL ? FRONTEND_URL.split(",") : ["http://localho
 
 const corsOptions = {
   origin: (origin, callback) => {
-    if (!origin) return callback(null, true); // allow server-to-server or tools like curl/postman
-    if (allowedOrigins.indexOf(origin) !== -1) {
+    // allow requests with no origin (like mobile apps or curl)
+    if (!origin) return callback(null, true);
+
+    if (allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
-      callback(new Error('CORS policy: Origin not allowed'));
+      callback(null, false); // No error object, just tell CORS it's not allowed
     }
   },
   methods: ["GET", "HEAD", "PUT", "PATCH", "POST", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
+  optionsSuccessStatus: 200, // Some legacy browsers (IE11, various SmartTVs) choke on 204
 };
 
 app.use(cors(corsOptions));
