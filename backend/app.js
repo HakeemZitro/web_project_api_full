@@ -11,7 +11,7 @@ require("dotenv").config();
 const { PORT } = process.env;
 
 const cors = require("cors");
-const allowedOrigins = ["https://around.hzitro.dev", "https://www.around.hzitro.dev", "https://api.around.hzitro.dev"];
+const allowedOrigins = ["https://around.hzitro.dev", "https://www.around.hzitro.dev", "https://api.around.hzitro.dev", "http://localhost:3210"];
 var corsOptions = {
   origin: function (origin, callback) {
     if (!origin) return callback(null, true);
