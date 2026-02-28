@@ -5,7 +5,7 @@ const cardsRouter = require("./routes/cards.js");
 const { login, createUser } = require("./controllers/users.js");
 const { auth } = require("./middlewares/auth.js");
 const { celebrate, Joi, errors } = require("celebrate");
-//const cors = require("cors");
+const cors = require("cors");
 const NotFoundError = require("./errors/not-found-err.js");
 
 require("dotenv").config();
@@ -19,23 +19,24 @@ mongoose.connect("mongodb://localhost:27017/aroundb");
 
 
 // CORS configuration: allow the frontend origin(s) and Authorization header
-//const { FRONTEND_URL } = process.env;
-//const allowedOrigins = FRONTEND_URL ? FRONTEND_URL.split(",") : ["http://localhost:3000"];
+const { FRONTEND_URL } = process.env;
+const allowedOrigins = FRONTEND_URL ? FRONTEND_URL.split(",") : ["http://localhost:3000"];
 
-//app.use(cors({
-//  origin: (origin, callback) => {
-//    if (!origin) return callback(null, true); // allow server-to-server or tools like curl/postman
-//    if (allowedOrigins.indexOf(origin) !== -1) {
-//      callback(null, true);
-//    } else {
-//      callback(new Error('CORS policy: Origin not allowed'));
-//    }
-//  },
-//  credentials: true,
-//  methods: ["GET", "HEAD", "PUT", "PATCH", "POST", "DELETE", "OPTIONS"],
-//  allowedHeaders: ["Content-Type", "Authorization"]
-//}));
-//app.options("*", cors());
+const corsOptions = {
+  origin: (origin, callback) => {
+    if (!origin) return callback(null, true); // allow server-to-server or tools like curl/postman
+    if (allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      callback(new Error('CORS policy: Origin not allowed'));
+    }
+  },
+  methods: ["GET", "HEAD", "PUT", "PATCH", "POST", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+};
+
+app.use(cors(corsOptions));
+app.options("*", cors(corsOptions));
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
