@@ -22,9 +22,9 @@ module.exports.getUsers = (req, res, next) => {
 // ----- Obtener informacion de usuario actual ----- //
 module.exports.getUserInfo = (req, res, next) => {
   User.findById(req.user._id)
-    .orFail(() => { throw new UnauthorizedError("Sin autorización, inicia sesión") })
-    .then(user => res.send(user))
-    .catch(next);
+  .orFail(() => { throw new UnauthorizedError("Sin autorización, inicia sesión") })
+  .then(user => res.send(user))
+  .catch(next);
 }
 
 
@@ -33,11 +33,9 @@ module.exports.getUserById = (req, res, next) => {
   const { id } = req.params;
 
   User.findById(id)
+    .orFail(() => { throw new NotFoundError("No se encontro al usuario") })
     .then(user => res.send(user))
-    .catch(() => {
-      const err = new NotFoundError("Usuario no encontrado o ID inválido");
-      next(err);
-    });
+    .catch(next);
 };
 
 
@@ -45,26 +43,15 @@ module.exports.getUserById = (req, res, next) => {
 module.exports.createUser = (req, res, next) => {
   const { email, password } = req.body;
 
-  if (!email || !password) {
-    const err = new BadRequestError("Email y contraseña son obligatorios");
-    next(err);
-  }
-  if (password.length < 6) {
-    const err = new BadRequestError("La contraseña debe tener una longitud mínima de 6 caracteres");
-    next(err);
-  }
-
   bcrypt.hash(password, NODE_ENV === "production" ? BCRYPT_ROUNDS : 10)
     .then((hash) => User.create({ email, password: hash }))
     .then((newUser) => res.status(201).send({ _id: newUser._id, email: newUser.email }))
     .catch((err) => {
       if (err.code === 11000) {
-        const err = new ConflictError("El email que intentas usar ya está registrado");
-        next(err);
+        next(new ConflictError("El email que intentas usar ya está registrado"));
       }
       if (err.name === "ValidationError") {
-        const err = new BadRequestError("Datos insuficientes y/o inválidos para crear un usuario");
-        next(err);
+        next(new BadRequestError("Datos insuficientes y/o inválidos para crear un usuario"));
       }
       next(err);
     });
@@ -80,8 +67,7 @@ module.exports.login = (req, res, next) => {
       res.send({ token: jwt.sign({ _id: user._id }, NODE_ENV === "production" ? JWT_SECRET : "dev-secret", { expiresIn: NODE_ENV === "production" ? JWT_ACCESS_EXPIRES_IN : "1d" }) });
     })
     .catch(() => {
-      const err = new UnauthorizedError("Email o contraseña incorrecto");
-      return next(err);
+      next(new UnauthorizedError("Email o contraseña incorrecto"));
     });
 }
 
@@ -90,19 +76,13 @@ module.exports.login = (req, res, next) => {
 module.exports.updateUserInfo = (req, res, next) => {
   const { name, about } = req.body;
 
-  if(!name && !about) {
-    const err = new BadRequestError("No se proporcionaron datos para actualizar la información del usuario");
-    next(err);
-  }
-
   User.findByIdAndUpdate(req.user._id, { name, about }, { new: true, runValidators: true })
     .then(updatedUser => {
         res.send(updatedUser)
       })
     .catch(err => {
       if (err.name === "ValidationError") {
-        const err = new BadRequestError("Datos insuficientes o inválidos para actualizar un usuario");
-        next(err);
+        next(new BadRequestError("Datos insuficientes o inválidos para actualizar un usuario"));
       }
       next(err);
     });
@@ -115,16 +95,11 @@ module.exports.updateUserAvatar = (req, res, next) => {
 
   User.findByIdAndUpdate(req.user._id, { avatar }, { new: true, runValidators: true })
     .then(updatedUser => {
-        if(!avatar) {
-          const err = new BadRequestError("No se proporcionaron datos para actualizar el avatar");
-          next(err);
-        }
         res.send(updatedUser)
       })
     .catch(err => {
       if (err.name === "ValidationError") {
-        const err = new BadRequestError("Datos insuficientes o inválidos para actualizar el avatar");
-        next(err);
+        next(new BadRequestError("Datos insuficientes o inválidos para actualizar el avatar"));
       }
       next(err);
     });

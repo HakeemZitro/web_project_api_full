@@ -22,8 +22,7 @@ module.exports.createCard = (req, res, next) => {
   Card.create({ name, link, owner: req.user._id })
     .then(card => res.send(card))
     .catch(() => {
-      const err = new BadRequestError("Datos insuficientes o inválidos para crear una tarjeta");
-      next(err);
+      next(new BadRequestError("Datos insuficientes o inválidos para crear una tarjeta"));
     });
 };
 
@@ -51,8 +50,7 @@ module.exports.likeCard = (req, res, next) => {
   Card.findByIdAndUpdate(cardId, { $addToSet: { likes: req.user._id } }, { new: true })
     .then(card => res.send(card))
     .catch(() => {
-      const err = new NotFoundError("La tarjeta a la que intentas dar like no existe");
-      next(err);
+      next(new NotFoundError("La tarjeta a la que intentas dar like no existe"));
     });
 }
 
@@ -64,7 +62,6 @@ module.exports.dislikeCard = (req, res, next) => {
   Card.findByIdAndUpdate(cardId, { $pull: { likes: req.user._id } }, { new: true })
     .then(card => res.send(card))
     .catch(() => {
-      const err = new NotFoundError("La tarjeta a la que intentas quitar el like no existe");
-      next(err);
+      next(new NotFoundError("La tarjeta a la que intentas quitar el like no existe"));
     });
 };

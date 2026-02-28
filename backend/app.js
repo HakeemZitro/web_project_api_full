@@ -6,6 +6,7 @@ const { login, createUser } = require("./controllers/users.js");
 const { auth } = require("./middlewares/auth.js");
 require("dotenv").config();
 const { NODE_ENV, PORT } = process.env;
+const { celebrate, Joi, errors } = require("celebrate");
 const NotFoundError = require("./errors/not-found-err.js");
 
 
@@ -16,8 +17,18 @@ mongoose.connect("mongodb://localhost:27017/aroundb");
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-app.post("/signin", login);
-app.post("/signup", createUser);
+app.post("/signup", celebrate({
+  body: Joi.object().keys({
+    email: Joi.string().required().email(),
+    password: Joi.string().required().min(6),
+  }),
+}), createUser);
+app.post("/signin", celebrate({
+  body: Joi.object().keys({
+    email: Joi.string().required().email(),
+    password: Joi.string().required().min(6),
+  }),
+}), login);
 
 app.use("/", auth, usersRouter);
 app.use("/", auth, cardsRouter);
@@ -26,6 +37,7 @@ app.use((req, res, next) => {
   const err = new NotFoundError("Recurso solicitado no encontrado");
   next(err);
 });
+app.use(errors());
 app.use((err, req, res, next) => {
   const { statusCode = 500, message } = err;
 

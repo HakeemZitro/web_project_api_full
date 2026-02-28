@@ -11,8 +11,7 @@ module.exports.auth = (req, res, next) => {
   const { authorization } = req.headers;
 
   if (!authorization) {
-    const err = new ForbiddenError("Sin autorización, inicia sesión");
-    next(err);
+    return next(new ForbiddenError("Sin autorización, inicia sesión"));
   }
 
   const token = authorization.replace("Bearer ", "");
@@ -25,7 +24,6 @@ module.exports.auth = (req, res, next) => {
     next();
   }
   catch (e) {
-    const err = new UnauthorizedError("Token inválido");
-    next(err);
+    next(new UnauthorizedError("Token inválido"));
   }
 };
