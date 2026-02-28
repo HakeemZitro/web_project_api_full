@@ -20,7 +20,12 @@ mongoose.connect("mongodb://localhost:27017/aroundb");
 
 // CORS configuration: allow the frontend origin(s) and Authorization header
 const { FRONTEND_URL } = process.env;
-const allowedOrigins = FRONTEND_URL ? FRONTEND_URL.split(",") : ["http://localhost:3000"];
+const envOrigins = FRONTEND_URL ? FRONTEND_URL.split(",").map(url => url.trim()) : [];
+const allowedOrigins = [
+  "http://localhost:3000",
+  "http://localhost:5173",
+  ...envOrigins
+];
 
 const corsOptions = {
   origin: (origin, callback) => {
@@ -30,11 +35,11 @@ const corsOptions = {
     if (allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
-      callback(null, false); // No error object, just tell CORS it's not allowed
+      callback(new Error("Not allowed by CORS"));
     }
   },
   methods: ["GET", "HEAD", "PUT", "PATCH", "POST", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization"],
+  allowedHeaders: ["Content-Type", "authorization"],
   optionsSuccessStatus: 200, // Some legacy browsers (IE11, various SmartTVs) choke on 204
 };
 
