@@ -18,7 +18,23 @@ const app = express();
 mongoose.connect("mongodb://localhost:27017/aroundb");
 
 
-app.use(cors());
+// CORS configuration: allow the frontend origin(s) and Authorization header
+const { FRONTEND_URL } = process.env;
+const allowedOrigins = FRONTEND_URL ? FRONTEND_URL.split(",") : ["http://localhost:3000"];
+
+app.use(cors({
+  origin: (origin, callback) => {
+    if (!origin) return callback(null, true); // allow server-to-server or tools like curl/postman
+    if (allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      callback(new Error('CORS policy: Origin not allowed'));
+    }
+  },
+  credentials: true,
+  methods: ["GET", "HEAD", "PUT", "PATCH", "POST", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"]
+}));
 app.options("*", cors());
 
 app.use(express.urlencoded({ extended: true }));
