@@ -5,51 +5,47 @@ const cardsRouter = require("./routes/cards.js");
 const { login, createUser } = require("./controllers/users.js");
 const { auth } = require("./middlewares/auth.js");
 const { celebrate, Joi, errors } = require("celebrate");
-const cors = require("cors");
 const NotFoundError = require("./errors/not-found-err.js");
-
-require("dotenv").config();
-const { NODE_ENV, PORT } = process.env;
-
 const { requestLogger, errorLogger } = require('./middlewares/logger');
+require("dotenv").config();
+const { PORT } = process.env;
+
+const cors = require("cors");
+const allowedOrigins = ["https://around.hzitro.dev", "https://www.around.hzitro.dev", "https://api.around.hzitro.dev"];
+var corsOptions = {
+  origin: function (origin, callback) {
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.indexOf(origin) === -1) {
+      var msg =
+        "The CORS policy for this site does not " +
+        "allow access from the specified Origin.";
+      return callback(new Error(msg), false);
+    }
+    return callback(null, true);
+  },
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'authorization'],
+}
 
 
 const app = express();
 mongoose.connect("mongodb://localhost:27017/aroundb");
 
-
-// CORS configuration: allow the frontend origin(s) and Authorization header
-const { FRONTEND_URL } = process.env;
-const envOrigins = FRONTEND_URL ? FRONTEND_URL.split(",").map(url => url.trim()) : [];
-const allowedOrigins = [
-  "http://localhost:3000",
-  "http://localhost:5173",
-  ...envOrigins
-];
-
-const corsOptions = {
-  origin: (origin, callback) => {
-    // allow requests with no origin (like mobile apps or curl)
-    if (!origin) return callback(null, true);
-
-    if (allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error("Not allowed by CORS"));
-    }
-  },
-  methods: ["GET", "HEAD", "PUT", "PATCH", "POST", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "authorization"],
-  optionsSuccessStatus: 200, // Some legacy browsers (IE11, various SmartTVs) choke on 204
-};
-
-app.use(cors(corsOptions));
-app.options("*", cors(corsOptions));
+app.use(cors({
+  origin: corsOptions,
+}));
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
 app.use(requestLogger);
+
+
+app.get('/crash-test', () => {
+  setTimeout(() => {
+    throw new Error('El servidor va a caer');
+  }, 0);
+});
 
 app.post("/signup", celebrate({
   body: Joi.object().keys({
@@ -82,4 +78,4 @@ app.use((err, req, res, next) => {
 });
 
 
-app.listen(NODE_ENV === "production" ? PORT : 3000);
+app.listen(PORT);
