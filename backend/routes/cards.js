@@ -7,16 +7,16 @@ const validateURL = (value, helpers) => {
   if (validator.isURL(value)) {
     return value;
   }
-  return helpers.error('string.uri');
+  return helpers.error("string.uri");
 }
 
-cardsRouter.get('/cards', celebrate({
+cardsRouter.get("/cards", celebrate({
   headers: Joi.object().keys({
     authorization: Joi.string().required(),
   }).unknown(true),
 }), getCards);
 
-cardsRouter.post('/cards', celebrate({
+cardsRouter.post("/cards", celebrate({
   headers: Joi.object().keys({
     authorization: Joi.string().required(),
   }).unknown(true),
@@ -26,7 +26,7 @@ cardsRouter.post('/cards', celebrate({
   }),
 }), createCard);
 
-cardsRouter.delete('/cards/:cardId', celebrate({
+cardsRouter.delete("/cards/:cardId", celebrate({
   headers: Joi.object().keys({
     authorization: Joi.string().required(),
   }).unknown(true),
@@ -35,7 +35,7 @@ cardsRouter.delete('/cards/:cardId', celebrate({
   }),
 }), deleteCard);
 
-cardsRouter.put('/cards/:cardId/likes', celebrate({
+cardsRouter.put("/cards/:cardId/likes", celebrate({
   headers: Joi.object().keys({
     authorization: Joi.string().required(),
   }).unknown(true),
@@ -44,7 +44,7 @@ cardsRouter.put('/cards/:cardId/likes', celebrate({
   }),
 }), likeCard);
 
-cardsRouter.delete('/cards/:cardId/likes', celebrate({
+cardsRouter.delete("/cards/:cardId/likes", celebrate({
   headers: Joi.object().keys({
     authorization: Joi.string().required(),
   }).unknown(true),
