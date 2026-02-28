@@ -5,6 +5,7 @@ const cardsRouter = require("./routes/cards.js");
 const { login, createUser } = require("./controllers/users.js");
 const { auth } = require("./middlewares/auth.js");
 const { celebrate, Joi, errors } = require("celebrate");
+const cors = require("cors");
 const NotFoundError = require("./errors/not-found-err.js");
 
 require("dotenv").config();
@@ -16,6 +17,9 @@ const { requestLogger, errorLogger } = require('./middlewares/logger');
 const app = express();
 mongoose.connect("mongodb://localhost:27017/aroundb");
 
+
+app.use(cors());
+app.options("*", cors());
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
