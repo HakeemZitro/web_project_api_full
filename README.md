@@ -41,4 +41,3 @@ Visita la aplicación en: https://around.hzitro.dev
 ![Página Principal Perspectiva Usuario 1](./readme_assets/Main_Page_User1.avif)
 ![Página Principal Perspectiva Usuario 2](./readme_assets/Main_Page_User2.avif)
 ![Agregando una Publicación](./readme_assets/Adding_Post.avif)
-![Demo de la Aplicación](./readme_assets/Page_Demo.mp4)

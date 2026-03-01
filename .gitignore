@@ -14,3 +14,7 @@ node_modules
 .idea
 .vscode
 .env
+
+# Archivos que no se deben mover de GitHub
+frontend
+readme_assets
