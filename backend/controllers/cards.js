@@ -48,6 +48,7 @@ module.exports.likeCard = (req, res, next) => {
   const { cardId } = req.params;
 
   Card.findByIdAndUpdate(cardId, { $addToSet: { likes: req.user._id } }, { new: true })
+    .populate("likes")
     .then(card => res.send(card))
     .catch(() => {
       next(new NotFoundError("La tarjeta a la que intentas dar like no existe"));
@@ -60,6 +61,7 @@ module.exports.dislikeCard = (req, res, next) => {
   const { cardId } = req.params;
 
   Card.findByIdAndUpdate(cardId, { $pull: { likes: req.user._id } }, { new: true })
+    .populate("likes")
     .then(card => res.send(card))
     .catch(() => {
       next(new NotFoundError("La tarjeta a la que intentas quitar el like no existe"));
